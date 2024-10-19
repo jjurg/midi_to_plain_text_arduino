@@ -8,3 +8,24 @@ For example, a midi file containing the A major scale as included in the file ex
 (A3, wholeNote), (B3, wholeNote), (C#4, wholeNote), (D4, wholeNote), (E4, wholeNote), (F#4, wholeNote), (G#4, wholeNote), (A4, wholeNote)
 
 to the file plain_example_scale.mid.txt
+
+Adding support for Arduino Format
+
+as in ToneMelodi.ini
+
+int melody[] = {
+  NOTE_G4, NOTE_G4, NOTE_G4, NOTE_DS4, NOTE_F4, NOTE_F4, NOTE_F4, NOTE_D4,
+  NOTE_G4, NOTE_G4, NOTE_G4, NOTE_DS4, NOTE_F4, NOTE_F4, NOTE_F4, NOTE_D4,
+  NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_F4, NOTE_F4,
+  NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_F4, NOTE_F4,
+  NOTE_G4, NOTE_G4, NOTE_G4, NOTE_DS4, NOTE_F4, NOTE_F4, NOTE_F4, NOTE_D4
+};
+
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+int noteDurations[] = {
+  8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8, 8, 8, 8, 8, 8, 8,
+  4, 8, 8, 8, 8, 4, 4,
+  4, 8, 8, 8, 8, 4, 4,
+  8, 8, 8, 8, 8, 8, 8, 8
+};
