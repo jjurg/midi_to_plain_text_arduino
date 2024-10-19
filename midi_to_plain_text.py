@@ -1,5 +1,4 @@
 import subprocess
-import re
 import sys
 
 try:
@@ -10,12 +9,12 @@ except:
     exit(1)
 
 try:
-    import py_midicsv as pm
-except:
-    package = 'py_midicsv'
+    from mido import MidiFile
+except ImportError:
+    package = 'mido'
     # Use pip to install the package
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-    import py_midicsv as pm
+    from mido import MidiFile
 
 midi_note_dict = {
     0: 'rest',
@@ -30,54 +29,27 @@ midi_note_dict = {
     108: 'C8'
 }
 
-# Parse the midi file into a csv text format
-csv_string = pm.midi_to_csv(filename)
+midi = MidiFile(filename)
 
-# Extract the clocks per quarter note from the header
-regex = re.compile(r"\d+, \d+, .+, \d+, \d+, (\d+)")
-clocks_per_quarter = int(regex.match(csv_string[0]).group(1))
-
-# Remove all the lines before the note data
-print("Removing unnecessary lines.")
-while "Note_on_c" not in csv_string[0]:
-    csv_string.pop(0)
-
-# Remove all lines after note data
-while "Note_off_c" not in csv_string[-1]:
-    csv_string.pop()
-
-# Remove extraneous information from remaining lines
-
-# Regex for parsing out the time and note from each line
-regex = re.compile(r"\d+, (\d+), .+, \d+, (\d+), \d+")
-
-cleaned_lines = []
-print("Parsing note lines.")
-for line in csv_string:
-    regex_result = regex.match(line)
-    # Extract the time and note using the regex
-    time_note = regex_result.group(1, 2)
-
-    # Convert them to integers
-    time_note = tuple([int(a) for a in time_note])
-
-    cleaned_lines.append(time_note)
-
-# Now, determine the length and kind of each note
 notes = []
+current_notes = {}
+clocks_per_quarter = midi.ticks_per_beat
 
-current_note = None
-print("Cleaning lines.")
-for time_note in cleaned_lines:
-    if current_note:
-        # If a note is currently pressed
-        duration = time_note[0] - current_note[0]
-        note = midi_note_dict[time_note[1]]
-
-        notes.append((note, duration))
-        current_note = None
-    else:
-        current_note = time_note
+print("Parsing MIDI file...")
+for track in midi.tracks:
+    current_time = 0
+    for msg in track:
+        current_time += msg.time
+        if msg.type == 'note_on' and msg.velocity > 0:
+            current_notes[msg.note] = current_time
+        elif msg.type == 'note_off' or (msg.type == 'note_on' and msg.velocity == 0):
+            if msg.note in current_notes:
+                start_time = current_notes.pop(msg.note)
+                duration = current_time - start_time
+                note = midi_note_dict.get(msg.note, 'unknown')
+                notes.append((note, duration))
+                if note == 'unknown':
+                    print(f"Warning: Missing note for MIDI value {msg.note}")
 
 # Now notes is in the format (A4, 256), (C5, 512) for example
 
@@ -95,7 +67,11 @@ note_length_dict = {
 }
 
 # Change the second entry to the corresponding dictionary value
-notes = [(note[0], note_length_dict[note[1]]) for note in notes]
+notes = [(note[0], note_length_dict.get(note[1], 'unknown')) for note in notes]
+
+for note, duration in notes:
+    if duration == 'unknown':
+        print(f"Warning: Missing duration for clock value {note[1]}")
 
 if output_format == 'text':
     print("Writing to file...")
