@@ -9,9 +9,12 @@ For example, a midi file containing the A major scale as included in the file ex
 
 to the file plain_example_scale.mid.txt
 
-Adding support for Arduino Format
+Adding support for Arduino Format, use with 
 
-as in ToneMelodi.ini
+python midi_to_plain_text.py example_scale.mid arduino
+
+to save the file arduino_example_scale.ino
+
 
 int melody[] = {
   NOTE_G4, NOTE_G4, NOTE_G4, NOTE_DS4, NOTE_F4, NOTE_F4, NOTE_F4, NOTE_D4,
@@ -21,7 +24,9 @@ int melody[] = {
   NOTE_G4, NOTE_G4, NOTE_G4, NOTE_DS4, NOTE_F4, NOTE_F4, NOTE_F4, NOTE_D4
 };
 
+
 // note durations: 4 = quarter note, 8 = eighth note, etc.:
+
 int noteDurations[] = {
   8, 8, 8, 8, 8, 8, 8, 8,
   8, 8, 8, 8, 8, 8, 8, 8,
